@@ -1,0 +1,18 @@
+services:
+  postgres-db:
+    image: postgres:15
+    container_name: topics-dev
+
+    environment:
+      POSTGRES_DB: topics_db
+      POSTGRES_USER: erv
+      POSTGRES_PASSWORD: erv
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-dev-data:

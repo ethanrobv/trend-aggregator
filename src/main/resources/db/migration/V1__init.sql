@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS wikipedia_articles (
+    id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    url VARCHAR,
+    views BIGINT,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);

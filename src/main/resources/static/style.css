@@ -1,0 +1,150 @@
+/* 1. Set the root font size to 10px for easy math */
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-family: 'Inter', Arial, sans-serif;
+    display: flex;
+    font-size: 1.6rem;
+    line-height: 1.5;
+    background-color: #f7f8fa; /* Light background */
+    color: #333;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 3.2rem;
+}
+
+/* Sidebar styles */
+.sidebar {
+    width: 40.0rem;
+    flex-shrink: 0;
+    background-color: #ffffff; /* Clean white */
+    border-left: 0.1rem solid #e0e0e0; /* Softer border */
+    padding: 2.4rem;
+    height: 100vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.sidebar h3 {
+    margin-top: 0;
+    border-bottom: 0.1rem solid #e0e0e0;
+    padding-bottom: 1.0rem;
+    font-size: 2.0rem; /* Slightly smaller */
+    font-weight: 700; /* Bolder */
+    color: #000;
+}
+
+#wiki-article-list {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#wiki-article-list li {
+    margin-bottom: 1.8rem;
+    font-size: 1.4rem;
+}
+
+#wiki-article-list a {
+    text-decoration: none;
+    color: #000; /* Darker, more modern */
+    font-weight: 600;
+    transition: color 0.2s ease; /* Hover effect */
+}
+
+#wiki-article-list a:hover {
+    text-decoration: none;
+    color: #0056b3; /* Blue on hover */
+}
+
+#wiki-article-list .views-trend-container {
+    display: flex;
+    justify-content: flex-start;
+    margin: 0;
+}
+
+#wiki-article-list .views-trend-container .views {
+    display: block;
+    font-size: 1.2rem;
+    color: #666; /* Lighter text */
+    margin-top: 0.4rem;
+    margin-right: 0.4rem;
+}
+
+/* Loading/Error states */
+.loading,
+.error {
+    color: #888;
+    font-style: italic;
+}
+
+/* Tone chart link */
+.tone-link {
+    font-size: 1.1rem;
+    color: #0056b3; /* Blue */
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+.tone-link:hover {
+    color: #000;
+    text-decoration: underline;
+}
+
+/* Modal styles */
+#modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Slightly darker overlay */
+    z-index: 10;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+#chart-modal {
+    background: #fff;
+    padding: 2.4rem;
+    border-radius: 1.2rem; /* More rounded */
+    width: 90%;
+    max-width: 80.0rem;
+    box-shadow: 0 0.8rem 2.5rem rgba(0,0,0,0.15); /* Softer shadow */
+    position: relative;
+    box-sizing: border-box;
+}
+
+#close-modal {
+    position: absolute;
+    top: 1.2rem;
+    right: 2.0rem;
+    font-size: 3.0rem;
+    font-weight: 300; /* Thinner 'x' */
+    color: #aaa;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+#close-modal:hover {
+    color: #333;
+}
+
+#chart-title {
+    margin-top: 0;
+    margin-bottom: 2.0rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+    max-width: 90%;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    max-height: 40.0rem;
+}
