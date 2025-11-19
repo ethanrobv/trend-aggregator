@@ -7,9 +7,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.r2dbc.postgresql.codec.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import world.erv.topics.event.WikipediaArticlesUpdatedEvent;
 import world.erv.topics.model.WikipediaArticle;
 import world.erv.topics.repository.WikipediaArticleRepository;
 
@@ -20,43 +23,61 @@ public class GdeltService {
 
     private static final Logger log = LoggerFactory.getLogger(GdeltService.class);
     private static final String GDELT_TIMESPAN = "7d";
-
+    private final int GDELT_CONCURRENCY = 5;
+    private final TransactionalOperator transactionalOperator;
+    private final ObjectMapper objectMapper;
     private final WebClient webClient;
     private final WikipediaArticleRepository articleRepository;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    public GdeltService(WebClient.Builder webClientBuilder, WikipediaArticleRepository articleRepository) {
-        this.webClient = webClientBuilder.build();
+    public GdeltService(TransactionalOperator transactionalOperator,
+                        ObjectMapper objectMapper,
+                        WebClient gdeltWebClient,
+                        WikipediaArticleRepository articleRepository
+    ) {
+        this.transactionalOperator = transactionalOperator;
+        this.objectMapper = objectMapper;
+        this.webClient = gdeltWebClient;
         this.articleRepository = articleRepository;
     }
 
-    public Mono<Void> processArticleGdeltToneCharts() {
-        log.info("Starting processArticleGdeltToneCharts");
-        int concurrency = 5;
+    @EventListener
+    public Mono<Void> handleWikipediaArticlesUpdatedEvent(WikipediaArticlesUpdatedEvent event) {
+        log.info("[EVENT: Consumed {}]", event);
+        return this.processGdeltToneCharts()
+                .onErrorResume(error -> {
+                    log.error("GDELT processing failed: {}", error.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<Void> processGdeltToneCharts() {
+        log.info("Updating tone chart data...");
+
         return articleRepository.findAll()
-                .flatMap(this::fetchAndSetToneChart, concurrency)
-                .flatMap(articleRepository::save)
-                .then()
-                .doOnSuccess(updatedArticles -> log.info("Finished fetching tone chart data."))
-                .doOnError(error ->
-                        log.error("Failed updating articles: {}", error.getMessage()));
+                .flatMap(this::fetchAndSetToneChart, GDELT_CONCURRENCY)
+                .flatMap(articleToSave -> {
+                    return articleRepository.save(articleToSave)
+                            .as(transactionalOperator::transactional)
+                            .onErrorResume(error -> {
+                                log.error("Failed to save GDELT data for article: {}: {}",
+                                        articleToSave, error.getMessage());
+                                return Mono.empty();
+                            });
+                })
+                .then();
     }
 
     private Mono<WikipediaArticle> fetchAndSetToneChart(WikipediaArticle article) {
         String query = article.getTitle();
-        String gdeltApiUrl = "https://api.gdeltproject.org/api/v2/doc/doc";
-        String uri = String.format("%s?query=\"%s\"&mode=tonechart&format=json&timespan=%s",
-                gdeltApiUrl, query, GDELT_TIMESPAN);
-
+        String uri = String.format("?query=\"%s\"&mode=tonechart&format=json&timespan=%s", query, GDELT_TIMESPAN);
         Mono<String> chartJsonMono = webClient.get()
                 .uri(uri)
                 .retrieve()
                 .bodyToMono(JsonNode.class)
-                .map(this::parseToneChartResponse);
+                .map(this::parseToneChartResponse)
+                .onErrorReturn(buildEmptyToneChartJson());
 
         return chartJsonMono
-                .onErrorReturn(buildEmptyToneChartJson())
                 .map(jsonString -> {
                     article.setToneChart(Json.of(jsonString));
                     return article;

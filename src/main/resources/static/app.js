@@ -1,11 +1,13 @@
-import { fetchTopArticles, fetchArticleToneChart } from './api.js';
+import { fetchTopArticles, fetchArticleToneChart, fetchLatestRedditPosts } from './api.js';
 import { displayToneChart, destroyCurrentChart } from './chart.js';
 import {
     renderArticleList,
     showArticleError,
     hideModal,
     showModalLoading,
-    showModalError
+    showModalError,
+    renderRedditPosts,
+    showMainContentLoading
 } from './ui.js';
 
 document.addEventListener('DOMContentLoaded', initializeApp);
@@ -41,7 +43,7 @@ function initializeApp() {
 async function loadTopArticles() {
     try {
         const articles = await fetchTopArticles();
-        renderArticleList(articles);
+        renderArticleList(articles, handleArticleSelection);
     } catch (error) {
         console.error('Failed to fetch articles:', error);
         showArticleError('Failed to load articles.');
@@ -70,5 +72,23 @@ async function handleArticleListClick(event) {
     } catch (error) {
         console.error('Failed to fetch tone chart:', error);
         showModalError('Error loading tone data.');
+    }
+}
+
+/**
+ * Handles clicks on individual article items.
+ * @param articleId
+ * @param articleTitle
+ * @returns {Promise<void>}
+ */
+async function handleArticleSelection(articleId, articleTitle) {
+    showMainContentLoading();
+    try {
+        const posts = await fetchLatestRedditPosts(articleId);
+        renderRedditPosts(posts, articleTitle);
+    } catch (error) {
+        console.error(error);
+        document.getElementById('reddit-feed-container').innerHTML =
+            `<div class="error">Failed to load posts: ${error.message}</div>`;
     }
 }
