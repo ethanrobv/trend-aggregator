@@ -126,7 +126,7 @@ export function renderRedditPosts(posts, subjectTitle) {
     const container = document.getElementById('reddit-feed-container');
     const feedTitle = document.getElementById('main-feed-title');
 
-    container.innerHTML = ''; // Clear previous posts
+    container.innerHTML = '';
     feedTitle.textContent = `Latest Discussions: ${subjectTitle}`;
 
     if (!posts || posts.length === 0) {
@@ -138,14 +138,12 @@ export function renderRedditPosts(posts, subjectTitle) {
         const postDiv = document.createElement('div');
         postDiv.className = 'reddit-post';
 
-        // 1. Header (Subreddit + Date)
         const metaDiv = document.createElement('div');
         metaDiv.className = 'post-meta';
-        // Assuming createdAt is an ISO string or timestamp
-        const date = new Date(post.createdAt).toLocaleDateString();
+
+        const date = new Date(post.postedAt).toLocaleDateString();
         metaDiv.textContent = `${post.subreddit} • ${date}`;
 
-        // 2. Title (Link)
         const titleLink = document.createElement('a');
         titleLink.href = post.url;
         titleLink.className = 'post-title';
@@ -153,12 +151,10 @@ export function renderRedditPosts(posts, subjectTitle) {
         titleLink.target = '_blank';
         titleLink.rel = 'noopener noreferrer';
 
-        // 3. Upvotes
         const upvotesDiv = document.createElement('div');
         upvotesDiv.className = 'post-upvotes';
-        upvotesDiv.innerHTML = `<span>⬆</span> ${post.upvotes.toLocaleString()}`;
+        upvotesDiv.innerHTML = `${post.upvotes.toLocaleString()} <span> upvotes</span> `;
 
-        // 4. Body (Optional - truncate if too long)
         if (post.body) {
             const bodyDiv = document.createElement('div');
             bodyDiv.className = 'post-body';

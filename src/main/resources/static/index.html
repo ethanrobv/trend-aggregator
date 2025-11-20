@@ -11,26 +11,34 @@
 </head>
 <body>
 
-<div class="main-content">
-    <h1 id="main-feed-title">Select an article to view discussions</h1>
-    <div id="reddit-feed-container" class="feed-container">
-        <p class="placeholder-text">Click an article title in the sidebar to load related Reddit discussions.</p>
-    </div>
-</div>
+<header class="navbar">
+    <div class="navbar-brand">topics.erv.world</div>
+    <button id="theme-toggle" class="theme-btn" aria-label="Toggle Dark Mode">
+        <span class="icon-sun">☀</span>
+        <span class="icon-moon">☾</span>
+    </button>
+</header>
 
-<nav id="wikipedia-sidebar" class="sidebar">
-    <h3>Most Viewed Wikipedia Articles</h3>
-    <ul id="wiki-article-list">
-        <li class="loading">Loading...</li>
-    </ul>
-</nav>
+<div class="content-wrapper">
+    <nav id="wikipedia-sidebar" class="sidebar">
+        <h3>Most Viewed Wikipedia Articles</h3>
+        <ul id="wiki-article-list">
+            <li class="loading">Loading...</li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <h1 id="main-feed-title">Select an article to view discussions</h1>
+        <div id="reddit-feed-container" class="feed-container">
+            <p class="placeholder-text">Click an article title in the sidebar to load related Reddit discussions.</p>
+        </div>
+    </main>
+</div>
 
 <div id="modal-overlay">
     <div id="chart-modal">
         <span id="close-modal">&times;</span>
-
         <h4 id="chart-title">Tone Chart</h4>
-
         <div class="chart-container">
             <canvas id="tone-chart-canvas"></canvas>
         </div>

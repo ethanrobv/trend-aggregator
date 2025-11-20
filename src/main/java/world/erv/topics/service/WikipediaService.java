@@ -15,6 +15,7 @@ import world.erv.topics.event.WikipediaArticlesUpdatedEvent;
 import world.erv.topics.model.WikipediaArticle;
 import world.erv.topics.repository.WikipediaArticleRepository;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -41,6 +42,8 @@ public class WikipediaService {
         this.articleRepository = articleRepository;
     }
 
+    /* From REST routes */
+
     public Flux<WikipediaArticle> getTopArticles(int maxArticles) {
         return articleRepository.findAllByOrderByViewsDesc()
                 .take(maxArticles);
@@ -52,15 +55,38 @@ public class WikipediaService {
                 .defaultIfEmpty(Json.of("{\"histogram\":[]}"));
     }
 
+    /* Automatic & event driven methods */
+
     @Scheduled(
             fixedRateString = "PT1H",
             initialDelayString = "PT10S"
     )
     public Mono<Void> updateMostReadArticlesData() {
+        return articleRepository.findTopByOrderByCreatedAtDesc()
+                .map(latestArticle -> {
+                    Duration timeSinceLastFetch = Duration.between(latestArticle.getCreatedAt(), Instant.now());
+                    boolean isStale = timeSinceLastFetch.toMinutes() >= 59;
+                    if (!isStale) {
+                        log.info("Skipping most read article update: Data last fetched {} minutes ago",
+                                timeSinceLastFetch.toMinutes());
+                    }
+
+                    return isStale;
+                })
+                .defaultIfEmpty(true)
+                .filter(shouldUpdate -> shouldUpdate)
+                .flatMap(r -> {
+                    return doMostReadArticlesUpdate();
+                });
+    }
+
+    /* Private helpers */
+
+    private Mono<Void> doMostReadArticlesUpdate() {
         log.info("Updating wikipedia most viewed article data...");
         Mono<List<WikipediaArticle>> fetchArticlesMono = fetchMostReadArticlesData()
                 .doOnError(error -> {
-                    log.error("Failed to fetch most read articles data: {}", error.getMessage());
+                    log.error("Failed to fetch most read articles data", error);
                 });
         Mono<Void> publishArticlesUpdatedEvent = Mono.fromRunnable(() -> {
             WikipediaArticlesUpdatedEvent event = new WikipediaArticlesUpdatedEvent(Instant.now());
@@ -72,7 +98,7 @@ public class WikipediaService {
                 .flatMap(articlesToSave -> {
                     Mono<List<WikipediaArticle>> articleRefreshTransaction =
                             articleRepository.deleteAll()
-                            .then(articleRepository.saveAll(articlesToSave).collectList())
+                                    .then(articleRepository.saveAll(articlesToSave).collectList())
                                     .doOnSuccess(savedArticles -> {
                                         log.info("Fetched and saved {} articles", savedArticles.size());
                                     });
@@ -82,11 +108,11 @@ public class WikipediaService {
                             .then(publishArticlesUpdatedEvent);
                 })
                 .doOnError(error -> {
-                    log.error("Failed to update most read articles data: {}", error.getMessage());
+                    log.error("Failed to update most read articles data", error);
                 });
     }
 
-    protected Mono<List<WikipediaArticle>> fetchMostReadArticlesData() {
+    private Mono<List<WikipediaArticle>> fetchMostReadArticlesData() {
         LocalDate today = LocalDate.now();
         String year = today.format(DateTimeFormatter.ofPattern("yyyy"));
         String month = today.format(DateTimeFormatter.ofPattern("MM"));
@@ -107,18 +133,16 @@ public class WikipediaService {
         JsonNode articleNodes = response.path("mostread").path("articles");
         if (articleNodes.isArray()) {
             for (JsonNode articleNode : articleNodes) {
-                String title = articleNode.path("titles")
-                        .path("normalized").asText();
-
-                long views = articleNode.path("views").asLong();
-
-                String url = articleNode.path("content_urls")
+                WikipediaArticle article = new WikipediaArticle();
+                article.setTitle(articleNode.path("titles").path("normalized").asText());
+                article.setUrl(articleNode.path("content_urls")
                         .path("desktop")
-                        .path("page").asText();
+                        .path("page")
+                        .asText());
+                article.setViews(articleNode.path("views").asLong());
+                article.setViewTrend(getArticleTrendValue(articleNode.path("view_history")));
 
-                JsonNode view_history = articleNode.path("view_history");
-                double trend = getArticleTrendValue(view_history);
-                articles.add(new WikipediaArticle(title, views, url, trend));
+                articles.add(article);
             }
         }
 

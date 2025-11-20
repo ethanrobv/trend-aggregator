@@ -1,5 +1,6 @@
 package world.erv.topics.repository;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
@@ -11,5 +12,5 @@ public interface RedditPostRepository extends ReactiveCrudRepository<RedditPost,
     /**
      * Returns all reddit posts found from searching a wikipedia article's title.
      */
-    Flux<RedditPost> getByWikipediaArticleId(Long wikipediaArticleId);
+    Flux<RedditPost> getByWikipediaArticleId(Long wikipediaArticleId, Sort sort);
 }

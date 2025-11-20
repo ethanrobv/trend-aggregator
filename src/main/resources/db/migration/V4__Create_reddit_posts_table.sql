@@ -1,6 +1,7 @@
 CREATE TABLE reddit_posts (
     id BIGSERIAL PRIMARY KEY,
     body TEXT,
+    posted_at TIMESTAMP WITH TIME ZONE,
     subreddit VARCHAR(255),
     title TEXT,
     upvotes BIGINT,

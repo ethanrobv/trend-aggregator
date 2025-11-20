@@ -40,30 +40,36 @@ public class GdeltService {
         this.articleRepository = articleRepository;
     }
 
+    /* Automatic & event driven methods */
+
     @EventListener
     public Mono<Void> handleWikipediaArticlesUpdatedEvent(WikipediaArticlesUpdatedEvent event) {
         log.info("[EVENT: Consumed {}]", event);
+
         return this.processGdeltToneCharts()
+                .doOnSuccess(r -> {
+                    log.info("Finished GDELT processing");
+                })
                 .onErrorResume(error -> {
-                    log.error("GDELT processing failed: {}", error.getMessage());
+                    log.error("GDELT processing failed for event {}", event, error);
                     return Mono.empty();
                 });
     }
 
-    public Mono<Void> processGdeltToneCharts() {
+    /* Private helpers */
+
+    private Mono<Void> processGdeltToneCharts() {
         log.info("Updating tone chart data...");
 
         return articleRepository.findAll()
-                .flatMap(this::fetchAndSetToneChart, GDELT_CONCURRENCY)
-                .flatMap(articleToSave -> {
-                    return articleRepository.save(articleToSave)
-                            .as(transactionalOperator::transactional)
-                            .onErrorResume(error -> {
-                                log.error("Failed to save GDELT data for article: {}: {}",
-                                        articleToSave, error.getMessage());
-                                return Mono.empty();
-                            });
-                })
+                .flatMap(article -> this.fetchAndSetToneChart(article)
+                        .flatMap(articleRepository::save)
+                        .as(transactionalOperator::transactional)
+                        .onErrorResume(error -> {
+                            log.error("Failed to update tone chart data for subject '{}'", article.getTitle(), error);
+
+                            return Mono.empty();
+                        }), GDELT_CONCURRENCY)
                 .then();
     }
 
@@ -80,6 +86,7 @@ public class GdeltService {
         return chartJsonMono
                 .map(jsonString -> {
                     article.setToneChart(Json.of(jsonString));
+
                     return article;
                 });
     }
@@ -113,6 +120,7 @@ public class GdeltService {
         root.put("timespan", GDELT_TIMESPAN);
         root.put("query_date", LocalDate.now().toString());
         root.set("histogram", objectMapper.createArrayNode());
+
         return root.toString();
     }
 }

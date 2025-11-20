@@ -32,6 +32,7 @@ public class RedditController {
         return new RedditPostDto(
                 post.getId(),
                 post.getBody(),
+                post.getPostedAt(),
                 post.getSubreddit(),
                 post.getTitle(),
                 post.getUpvotes(),

@@ -21,6 +21,9 @@ public class RedditPost {
     @CreatedDate
     private Instant createdAt;
 
+    @Column("posted_at")
+    private Instant postedAt;
+
     @Column("wikipedia_article_id")
     private Long wikipediaArticleId;
 
@@ -42,6 +45,9 @@ public class RedditPost {
 
     public String getBody() { return this.body; }
     public void setBody(String body) { this.body = body; }
+
+    public Instant  getPostedAt() { return this.postedAt; }
+    public void setPostedAt(Instant postedAt) { this.postedAt = postedAt; }
 
     public String getSubreddit() { return this.subreddit; }
     public void setSubreddit(String subreddit) { this.subreddit = subreddit; }
