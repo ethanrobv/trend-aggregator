@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class AppConfig {
 
-    private static final String USER_AGENT = "ErvTopicsBot/1.0 (admin@erv.world)";
+    private static final String USER_AGENT = "web:com.erv.topics:v1.0 (ethanrobv@gmail.com)";
 
     @Bean
     public WebClient wikipediaWebClient(WebClient.Builder builder) {

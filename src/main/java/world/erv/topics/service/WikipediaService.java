@@ -2,8 +2,10 @@ package world.erv.topics.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.r2dbc.postgresql.codec.Json;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.reactive.TransactionalOperator;
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@ConditionalOnProperty(name = "features.wikipedia-service.enabled", havingValue = "true")
 public class WikipediaService {
 
     private static final Logger log = LoggerFactory.getLogger(WikipediaService.class);
@@ -40,6 +43,11 @@ public class WikipediaService {
         this.eventPublisher = eventPublisher;
         this.webClient = wikipediaWebClient;
         this.articleRepository = articleRepository;
+    }
+
+    @PostConstruct
+    public void init() {
+        log.info("Wikipedia service enabled");
     }
 
     /* From REST routes */

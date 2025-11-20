@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.r2dbc.postgresql.codec.Json;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.reactive.TransactionalOperator;
@@ -19,6 +21,7 @@ import world.erv.topics.repository.WikipediaArticleRepository;
 import java.time.LocalDate;
 
 @Service
+@ConditionalOnProperty(name = "features.gdelt-service.enabled", havingValue = "true")
 public class GdeltService {
 
     private static final Logger log = LoggerFactory.getLogger(GdeltService.class);
@@ -38,6 +41,11 @@ public class GdeltService {
         this.objectMapper = objectMapper;
         this.webClient = gdeltWebClient;
         this.articleRepository = articleRepository;
+    }
+
+    @PostConstruct
+    public void init() {
+        log.info("GDELT service enabled");
     }
 
     /* Automatic & event driven methods */

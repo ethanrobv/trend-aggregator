@@ -1,8 +1,10 @@
 package world.erv.topics.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@ConditionalOnProperty(name = "features.reddit-service.enabled", havingValue = "true")
 public class RedditService {
 
     private static final Logger log = LoggerFactory.getLogger(RedditService.class);
@@ -43,6 +46,11 @@ public class RedditService {
         this.webClient = redditWebClient;
         this.postRepository = postRepository;
         this.articleRepository = articleRepository;
+    }
+
+    @PostConstruct
+    public void init() {
+        log.info("Reddit service enabled");
     }
 
     /* From REST routes */

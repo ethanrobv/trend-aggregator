@@ -1,6 +1,7 @@
 package world.erv.topics.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +14,7 @@ import world.erv.topics.service.RedditService;
 import java.util.List;
 
 @RestController
+@ConditionalOnProperty(name = "features.reddit-service.enabled", havingValue = "true")
 @RequestMapping("/api")
 public class RedditController {
 
