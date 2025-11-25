@@ -32,6 +32,8 @@ dependencies {
     // R2DBC Drivers
     implementation("org.postgresql:r2dbc-postgresql")
 
+    implementation("com.google.genai:google-genai:1.28.0")
+
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

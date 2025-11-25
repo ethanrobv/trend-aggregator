@@ -65,6 +65,7 @@ public class RedditService {
     @EventListener
     public Mono<Void> handleWikipediaArticlesUpdatedEvent(WikipediaArticlesUpdatedEvent event) {
         log.info("[EVENT: Consumed {}", event);
+
         return this.updateLatestPostsData()
                 .doOnSuccess(r -> {
                     log.info("Finished Reddit processing");
