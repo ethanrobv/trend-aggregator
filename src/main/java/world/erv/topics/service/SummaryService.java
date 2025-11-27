@@ -13,7 +13,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import world.erv.topics.event.WikipediaArticlesUpdatedEvent;
+import world.erv.topics.event.WikipediaFeaturedFetchEvent;
 
 import java.util.Collections;
 
@@ -38,14 +38,14 @@ public class SummaryService {
     }
 
     @EventListener
-    public Mono<Void> handleWikipediaArticlesUpdatedEvent(WikipediaArticlesUpdatedEvent event) {
+    public Mono<Void> handleWikipediaArticlesUpdatedEvent(WikipediaFeaturedFetchEvent event) {
         log.info("[EVENT: Consumed {}", event);
 
-
+        return Mono.empty();
     }
 
     private Mono<Void> updateDiscussionData() {
-        return
+        return Mono.empty();
     }
 
     private String getRedditSummary(String subject) {

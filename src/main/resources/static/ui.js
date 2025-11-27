@@ -75,7 +75,7 @@ export function renderArticleList(articles, onArticleClick) {
         };
 
         const wikiLink = document.createElement('a');
-        wikiLink.href = article.articleUrl;
+        wikiLink.href = article.wikipediaUrl;
         wikiLink.target = '_blank';
         wikiLink.className = 'wiki-external-icon';
         wikiLink.innerHTML = ' &#8599;'; // Small arrow icon

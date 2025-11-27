@@ -1,9 +1,9 @@
 package world.erv.topics.dto;
 
 public record WikipediaArticleDto(
-        Long id,
         String title,
+        String url,
         long views,
-        String articleUrl,
-        double viewTrend) {
+        double viewTrend
+) {
 }

@@ -8,8 +8,8 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
 
-@Table("topics")
-public class Topic {
+@Table("wikipedia_view_history")
+public class WikipediaViewHistory {
 
     @Id
     private Long id;
@@ -17,16 +17,23 @@ public class Topic {
     private Instant createdAt;
     @LastModifiedDate
     private Instant modifiedAt;
-    private String title;
-    @Column("wikipedia_url")
-    private String wikipediaUrl;
+    @Column("topic_id")
+    private Long topicId;
+    @Column("view_trend")
+    private Double viewTrend;
+    private Long views;
 
-    public Topic() {
+    public WikipediaViewHistory() {
     }
 
-    public Topic(String title, String url) {
-        this.title = title;
-        this.wikipediaUrl = url;
+    public WikipediaViewHistory(
+            Long topicId,
+            Double viewTrend,
+            Long views
+    ) {
+        this.topicId = topicId;
+        this.viewTrend = viewTrend;
+        this.views = views;
     }
 
     public Long getId() {
@@ -53,19 +60,27 @@ public class Topic {
         this.modifiedAt = modifiedAt;
     }
 
-    public String getTitle() {
-        return title;
+    public Long getTopicId() {
+        return topicId;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setTopicId(Long topicId) {
+        this.topicId = topicId;
     }
 
-    public String getWikipediaUrl() {
-        return wikipediaUrl;
+    public Double getViewTrend() {
+        return viewTrend;
     }
 
-    public void setWikipediaUrl(String wikipediaUrl) {
-        this.wikipediaUrl = wikipediaUrl;
+    public void setViewTrend(Double viewTrend) {
+        this.viewTrend = viewTrend;
+    }
+
+    public Long getViews() {
+        return views;
+    }
+
+    public void setViews(Long views) {
+        this.views = views;
     }
 }
